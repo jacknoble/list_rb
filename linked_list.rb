@@ -36,14 +36,23 @@ class LinkedList
   end
 
   def each(&block)
+    return if empty?
     block.(@hd)
-    @tl.each(&block) unless @tl.empty?
+    @tl.each(&block)
   end
 
   def reverse
-    reduce(self.class.empty_list) do |list, element|
-      self.class.cons(element, list)
+    reduce(empty_list) do |list, element|
+      cons(element, list)
     end
+  end
+
+  # In-place reversal
+  def reverse!(new_tail = empty_list)
+    return self if empty?
+    old_tail, @tl = @tl, new_tail
+    return self if old_tail.empty?
+    old_tail.reverse!(self)
   end
 
   def at(index)
@@ -55,8 +64,25 @@ class LinkedList
 
   def +(list)
     reverse.reduce(list) do |list, element|
-      self.class.cons(element, list)
+      cons(element, list)
     end
+  end
+
+  def ==(other_list)
+    return false if empty? != other_list.empty?
+    return false if head != other_list.head
+    return true if empty?
+    @tl == other_list.tail
+  end
+
+  private
+
+  def empty_list
+    self.class.empty_list
+  end
+
+  def cons(head, tail)
+    self.class.cons(head, tail)
   end
 end
 
