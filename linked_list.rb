@@ -36,8 +36,9 @@ class LinkedList
   end
 
   def each(&block)
+    return to_enum(:each) unless block_given?
     return if empty?
-    block.(@hd)
+    block.call(@hd)
     @tl.each(&block)
   end
 
@@ -55,10 +56,14 @@ class LinkedList
     old_tail.reverse!(self)
   end
 
-  def at(index)
+  def node_at(index)
     return if empty?
-    return @hd if index.zero?
-    tail.at(index - 1)
+    return self if index.zero?
+    tail.node_at(index - 1)
+  end
+
+  def at(index)
+    node_at(index).hd
   end
   alias_method :[], :at
 
@@ -75,6 +80,32 @@ class LinkedList
     @tl == other_list.tail
   end
 
+  def dup
+    reverse.reverse
+  end
+
+  def sorted
+    from_a(self.sort)
+  end
+
+  def sorted?
+    self == sorted
+  end
+
+  def bisect
+    return [empty_set, empty_set] if empty?
+    return [self, empty_set] if @tl.empty?
+    lhs = dup
+    middle_node = lhs.node_at( (count - 1) / 2)
+    rhs = middle_node.tail
+    middle_node.tl = empty_list # Sever the list
+    [lhs, rhs]
+  end
+
+  protected
+
+  attr_writer :hd, :tl
+
   private
 
   def empty_list
@@ -83,6 +114,10 @@ class LinkedList
 
   def cons(head, tail)
     self.class.cons(head, tail)
+  end
+
+  def from_a(array)
+    self.class.from_a(array)
   end
 end
 
